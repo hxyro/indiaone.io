@@ -1,11 +1,12 @@
 html,
 body {
+    height: 100%; /* Ensure the body and html cover the viewport */
+    margin: 0; /* Remove any default margin */
     background: url(https://hxyro.github.io/indiaone.io/back.jpg) no-repeat center center fixed; 
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    margin: 0;
     color: #fff;
     font-family: 'Montserrat', sans-serif;
     position: relative;
@@ -18,66 +19,65 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: -1; /* Keep it behind the content */
 }
 
 .content {
-   width:80%;
-   text-align:center;
+    width: 80%;
+    text-align: center;
 }
 
 p {
-   font-size:18px;
-   display:inline-block;
-   line-height:18px;
+    font-size: 18px;
+    display: inline-block;
+    line-height: 18px;
 }
 
 #upper_left {
-	position: fixed;
-	bottom: 0;
-   left:0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
 }
 
 #bottom {
-	position: fixed;
-	bottom: 150px;
-   left:35px;
+    position: fixed;
+    bottom: 150px;
+    left: 35px;
 }
 
 .avatar {
-   border-radius:50%;
-   opacity: 0.60;
-   width:150px;
-   padding-left:10px;
-   padding-bottom:10px;
-   transition:.5s;
+    border-radius: 50%;
+    opacity: 0.60;
+    width: 150px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    transition: 0.5s;
 }
 
 .avatar:hover {
-   opacity:1;
-   transition:.5s;
-   padding-bottom:15px;
-   cursor:pointer;
+    opacity: 1;
+    transition: 0.5s;
+    padding-bottom: 15px;
+    cursor: pointer;
 }
 
 .header {
-   width:100%;
-   text-align:center;
-   margin-top:200px;
-   display:inline-block;
-   height:100px;
-   line-height:80px;
-   text-transform:uppercase;
+    width: 100%;
+    text-align: center;
+    margin-top: 200px;
+    display: inline-block;
+    height: 100px;
+    line-height: 80px;
+    text-transform: uppercase;
 }
 
 .logotext {
-   border:5px solid #fff;
-   width:50%;
-   border-radius:1px;
-   
+    border: 5px solid #fff;
+    width: 50%;
+    border-radius: 1px;
 }
 
 ::selection {
-   background:#1A1A1A;
+    background: #1A1A1A;
 }
