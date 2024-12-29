@@ -1,13 +1,25 @@
 html,
 body {
-   background: url(https://hxyro.github.io/indiaone.io/back.jpg) no-repeat center center fixed; 
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-   margin:0;
-   color:#fff;
-   font-family: 'Montserrat', sans-serif;
+    background: url(https://hxyro.github.io/indiaone.io/back.jpg) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    margin: 0;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
 }
 
 .content {
