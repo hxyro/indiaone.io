@@ -2,7 +2,7 @@ html,
 body {
     height: 100%; /* Ensure the body and html cover the viewport */
     margin: 0; /* Remove any default margin */
-    background: url(https://hxyro.github.io/indiaone.io/back.jpg) no-repeat center center fixed; 
+    background: url('back.jpg') no-repeat center center fixed; 
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
