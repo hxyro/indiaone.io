@@ -48,7 +48,11 @@
     </script>
     <style>
         /* UI & THEME */
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; background: #050510; }
+        body { 
+            margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            user-select: none; background: #050510; 
+            touch-action: none; /* Prevents scrolling/zooming on mobile */
+        }
         
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -94,15 +98,16 @@
         .bottom-hud {
             width: 100%; display: flex; align-items: flex-end; justify-content: center;
             position: relative;
+            margin-bottom: 20px;
         }
 
         /* CHARGE BAR */
         .bar-wrapper {
             display: flex; flex-direction: column; align-items: center; gap: 5px;
-            margin-bottom: 10px;
+            width: 100%; max-width: 500px;
         }
         .bar-container {
-            width: 500px; height: 30px; background: rgba(0,0,0,0.8);
+            width: 100%; height: 30px; background: rgba(0,0,0,0.8);
             border: 2px solid #fff; border-radius: 15px; overflow: hidden;
             box-shadow: 0 0 20px rgba(140, 122, 230, 0.4);
         }
@@ -126,6 +131,7 @@
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(9, 132, 227, 0.3);
             overflow: hidden;
+            /* Hide on very small screens to save space */
         }
         #minimap { width: 100%; height: 100%; }
 
@@ -158,6 +164,22 @@
         }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
+        /* JOYSTICK (Virtual) */
+        #joystick-zone {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: auto;
+        }
+        .joystick-base {
+            position: absolute; width: 100px; height: 100px;
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+            transform: translate(-50%, -50%); display: none;
+        }
+        .joystick-stick {
+            position: absolute; width: 40px; height: 40px;
+            background: rgba(0, 210, 211, 0.5); border-radius: 50%;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+
         #start-screen, #game-over-screen, #victory-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, #1e1e2e 0%, #000000 100%);
@@ -169,42 +191,63 @@
         #victory-screen { background: rgba(10, 40, 30, 0.95); display: none; }
 
         h1 { 
-            font-size: 100px; color: white; margin: 0; 
+            font-size: 80px; color: white; margin: 0; 
             text-shadow: 0 0 50px #0984e3; letter-spacing: -4px; text-align: center;
             font-family: 'Arial Black', sans-serif;
+            line-height: 0.9;
         }
         
-        .sub-text { color: #a4b0be; font-size: 24px; margin-top: 20px; max-width: 700px; text-align: center; line-height: 1.5; font-weight: 600;}
+        .sub-text { color: #a4b0be; font-size: 20px; margin-top: 20px; max-width: 90%; text-align: center; line-height: 1.5; font-weight: 600;}
         .key-word { color: #00d2d3; }
         .danger { color: #ff4757; }
 
         /* MENU BUTTONS */
         .menu-btn {
-            background: transparent; color: white; border: 3px solid #0984e3; padding: 15px 60px;
-            font-size: 24px; border-radius: 0px; cursor: pointer; font-weight: 900;
+            background: transparent; color: white; border: 3px solid #0984e3; padding: 15px 40px;
+            font-size: 20px; border-radius: 0px; cursor: pointer; font-weight: 900;
             box-shadow: 0 0 20px #0984e3; transition: all 0.2s;
             margin-top: 40px; text-transform: uppercase; letter-spacing: 3px;
         }
         .menu-btn:hover { background: #0984e3; box-shadow: 0 0 40px #0984e3; }
 
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            h1 { font-size: 50px; }
+            .sub-text { font-size: 16px; }
+            .hud-pill { padding: 8px 15px; font-size: 14px; }
+            .bar-container { height: 20px; }
+            .bar-text { font-size: 16px; }
+            #minimap-container { width: 100px; height: 100px; bottom: 80px; right: 10px; opacity: 0.7; }
+            #mode-msg { font-size: 30px; top: 20%; }
+            #fs-btn { width: 40px; height: 40px; font-size: 20px; top: 10px; right: 10px; }
+            .buff-container { right: 10px; top: 60px; }
+            .bottom-hud { margin-bottom: 40px; }
+        }
+
     </style>
 </head>
 <body>
+
+    <div id="joystick-zone">
+        <div id="joy-base" class="joystick-base">
+            <div id="joy-stick" class="joystick-stick"></div>
+        </div>
+    </div>
 
     <div id="ui-layer">
         <button id="fs-btn" title="Toggle Fullscreen">⛶</button>
 
         <div class="top-hud">
             <div class="hud-pill">🌌 <span id="score">0</span></div>
-            <div class="hud-pill">👾 THREATS: <span id="enemy-count">0</span></div>
+            <div class="hud-pill">👾 <span id="enemy-count">0</span></div>
         </div>
 
         <div id="mode-msg">SINGULARITY ACTIVE</div>
 
         <div class="buff-container">
-            <div id="buff-magnet" class="buff-pill">🧲 MAGNET <span id="time-magnet">0s</span></div>
-            <div id="buff-speed" class="buff-pill">⚡ SPEED <span id="time-speed">0s</span></div>
-            <div id="buff-double" class="buff-pill">💎 x2 PTS <span id="time-double">0s</span></div>
+            <div id="buff-magnet" class="buff-pill">🧲 <span id="time-magnet">0s</span></div>
+            <div id="buff-speed" class="buff-pill">⚡ <span id="time-speed">0s</span></div>
+            <div id="buff-double" class="buff-pill">💎 <span id="time-double">0s</span></div>
         </div>
 
         <div class="bottom-hud">
@@ -224,10 +267,10 @@
     <div id="start-screen">
         <h1>GALAXY EATER</h1>
         <div class="sub-text">
-            1. Eat <span class="key-word">Space Dust</span> to charge bar.<br>
-            2. Avoid <span class="danger">Red Viruses</span>.<br>
-            3. <b>Singularity Mode:</b> Eat enemies to win.<br>
-            4. Grab <span style="color:white; text-shadow: 0 0 10px white;">White Stars</span> for Supernova Blast.
+            1. Drag to Move / Use Mouse.<br>
+            2. Eat <span class="key-word">Space Dust</span>.<br>
+            3. Avoid <span class="danger">Viruses</span>.<br>
+            4. <b>Singularity:</b> Eat Everything.
         </div>
         <button id="start-btn" class="menu-btn">ENTER ORBIT</button>
     </div>
@@ -721,7 +764,52 @@
         const plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
         const tgt = new THREE.Vector3();
 
-        // --- INPUT & FULLSCREEN ---
+        // --- INPUT: VIRTUAL JOYSTICK & MOUSE ---
+        const joyZone = document.getElementById('joystick-zone');
+        const joyBase = document.getElementById('joy-base');
+        const joyStick = document.getElementById('joy-stick');
+        let joyActive = false;
+        let joyOrigin = {x:0, y:0};
+        let joyVector = {x:0, y:0};
+
+        joyZone.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            joyActive = true;
+            joyOrigin = { x: touch.clientX, y: touch.clientY };
+            joyBase.style.display = 'block';
+            joyBase.style.left = joyOrigin.x + 'px';
+            joyBase.style.top = joyOrigin.y + 'px';
+            joyStick.style.left = '50%';
+            joyStick.style.top = '50%';
+        });
+
+        joyZone.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if(!joyActive) return;
+            const touch = e.changedTouches[0];
+            const dx = touch.clientX - joyOrigin.x;
+            const dy = touch.clientY - joyOrigin.y;
+            const dist = Math.min(50, Math.sqrt(dx*dx + dy*dy)); // Limit stick movement radius
+            const angle = Math.atan2(dy, dx);
+            
+            const stickX = Math.cos(angle) * dist;
+            const stickY = Math.sin(angle) * dist;
+            
+            joyStick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
+            
+            // Normalize vector for movement (0 to 1)
+            joyVector = { x: stickX / 50, y: stickY / 50 };
+        });
+
+        joyZone.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            joyActive = false;
+            joyBase.style.display = 'none';
+            joyVector = {x:0, y:0};
+        });
+
+        // Mouse Fallback
         window.addEventListener('mousemove', (e) => {
             mouse.x = (e.clientX/window.innerWidth)*2-1;
             mouse.y = -(e.clientY/window.innerHeight)*2+1;
@@ -729,8 +817,10 @@
 
         const fsBtn = document.getElementById('fs-btn');
         fsBtn.addEventListener('click', toggleFullScreen);
+        fsBtn.addEventListener('touchstart', toggleFullScreen);
 
-        function toggleFullScreen() {
+        function toggleFullScreen(e) {
+            e.preventDefault();
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
             } else {
@@ -839,26 +929,46 @@
             
             holeRim.material.color.setHex(rimColor);
 
-            // --- MOVEMENT: FOLLOW CURSOR ---
-            raycaster.setFromCamera(mouse, camera);
-            raycaster.ray.intersectPlane(plane, tgt);
-            if(tgt) {
-                const dx = tgt.x - playerPos.x; const dz = tgt.z - playerPos.z;
-                const dist = Math.sqrt(dx*dx+dz*dz);
-                // "Dead zone" of 1.0 prevents jitter when hole reaches cursor
-                if(dist > 1.0) {
-                    const angle = Math.atan2(dz,dx);
-                    let currentSpeed = 0.8; 
-                    if(isSingularityMode) currentSpeed *= 2.0; 
-                    else if(buffs.speed > 0) currentSpeed *= 1.5;
+            // --- MOVEMENT LOGIC (Hybrid Joystick + Mouse) ---
+            let moveAngle = 0;
+            let moveSpeed = 0;
+            let moveActive = false;
 
-                    const spd = Math.min(dist, currentSpeed);
-                    let nx = playerPos.x + Math.cos(angle)*spd;
-                    let nz = playerPos.z + Math.sin(angle)*spd;
-                    nx = Math.max(-MAP_LIMIT, Math.min(MAP_LIMIT, nx)); 
-                    nz = Math.max(-MAP_LIMIT, Math.min(MAP_LIMIT, nz));
-                    playerPos.set(nx, 0, nz);
+            // 1. Check Joystick
+            if(joyActive && (joyVector.x !== 0 || joyVector.y !== 0)) {
+                moveActive = true;
+                moveAngle = Math.atan2(joyVector.y, joyVector.x);
+                // Use the magnitude of joystick for speed (0 to 1)
+                moveSpeed = Math.sqrt(joyVector.x**2 + joyVector.y**2);
+            }
+            // 2. Fallback to Mouse Raycasting
+            else {
+                raycaster.setFromCamera(mouse, camera);
+                raycaster.ray.intersectPlane(plane, tgt);
+                if(tgt) {
+                    const dx = tgt.x - playerPos.x; const dz = tgt.z - playerPos.z;
+                    const dist = Math.sqrt(dx*dx+dz*dz);
+                    if(dist > 1.0) {
+                        moveActive = true;
+                        moveAngle = Math.atan2(dz, dx);
+                        moveSpeed = Math.min(dist, 1.0); // Cap normalized speed at 1
+                    }
                 }
+            }
+
+            // Apply Movement
+            if(moveActive) {
+                let currentSpeedBase = 0.8; // Base Speed constant
+                if(isSingularityMode) currentSpeedBase *= 2.0; 
+                else if(buffs.speed > 0) currentSpeedBase *= 1.5;
+
+                const finalSpeed = moveSpeed * currentSpeedBase;
+
+                let nx = playerPos.x + Math.cos(moveAngle) * finalSpeed;
+                let nz = playerPos.z + Math.sin(moveAngle) * finalSpeed;
+                nx = Math.max(-MAP_LIMIT, Math.min(MAP_LIMIT, nx)); 
+                nz = Math.max(-MAP_LIMIT, Math.min(MAP_LIMIT, nz));
+                playerPos.set(nx, 0, nz);
             }
 
             holeGroup.position.x = playerPos.x; 
@@ -927,26 +1037,38 @@
             document.getElementById('victory-screen').style.display = 'flex';
         }
 
-        document.getElementById('start-btn').addEventListener('click', () => {
+        // Add touchstart listeners to buttons to ensure they work on mobile
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('start-btn').addEventListener('touchstart', (e)=>{e.preventDefault(); startGame();});
+
+        document.getElementById('retry-btn').addEventListener('click', retryGame);
+        document.getElementById('retry-btn').addEventListener('touchstart', (e)=>{e.preventDefault(); retryGame();});
+
+        document.getElementById('restart-btn').addEventListener('click', restartGame);
+        document.getElementById('restart-btn').addEventListener('touchstart', (e)=>{e.preventDefault(); restartGame();});
+
+        function startGame() {
             document.getElementById('start-screen').style.display = 'none';
             AudioEngine.startMusic();
             initGame();
             gameState = 'PLAYING';
-        });
-        document.getElementById('retry-btn').addEventListener('click', ()=> {
+        }
+        function retryGame() {
             document.getElementById('game-over-screen').style.display = 'none';
             AudioEngine.startMusic();
             playerPos.set(0,0,0);
             initGame();
             gameState = 'PLAYING';
-        });
-        document.getElementById('restart-btn').addEventListener('click', ()=> {
+        }
+        function restartGame() {
             document.getElementById('victory-screen').style.display = 'none';
             AudioEngine.startMusic();
             playerPos.set(0,0,0);
             initGame();
             gameState = 'PLAYING';
-        });
+        }
+
+
         window.addEventListener('resize', ()=>{
             camera.aspect=window.innerWidth/window.innerHeight;
             camera.updateProjectionMatrix();
